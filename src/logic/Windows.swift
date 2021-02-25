@@ -8,6 +8,7 @@ class Windows {
 
     // reordered list based on preferences, keeping the original index
     static func reorderList() {
+        
         list.sort {
             if let bool = sortByBooleanAttribute($0.isWindowlessApp, $1.isWindowlessApp) {
                 return bool
@@ -188,7 +189,16 @@ class Windows {
     }
 
     static func refreshIfWindowShouldBeShownToTheUser(_ window: Window, _ screen: NSScreen) {
+        let availableApps = ["iphonesimulator", "webstorm",  "brave.browser", "emulator"]
+        
         window.shouldShowTheUser =
+            availableApps.contains { element in
+                if ((window.application.runningApplication.bundleIdentifier ?? "nil").lowercased().contains(element.lowercased()) || (window.title.lowercased().contains(element.lowercased()))) {
+                    return true
+                } else {
+                    return false
+                }
+            } &&
             !(window.application.runningApplication.bundleIdentifier.flatMap { id in Preferences.dontShowBlacklist.contains { id.hasPrefix($0) } } ?? false) &&
             !(Preferences.appsToShow[App.app.shortcutIndex] == .active && window.application.runningApplication != NSWorkspace.shared.frontmostApplication) &&
             !(!(Preferences.showHiddenWindows[App.app.shortcutIndex] != .hide) && window.isHidden) &&
